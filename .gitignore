@@ -1,2 +1,7 @@
 vir_env
 __pycache__/
+
+*.jpg
+*.png
+*.bmp
+*.gif

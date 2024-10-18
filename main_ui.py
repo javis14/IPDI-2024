@@ -4,6 +4,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 from convolution_ui import create_frame_convolution
+from morphology_ui import create_frame_mophology
 
 
 def create_frame(event):
@@ -33,6 +34,8 @@ def create_frame(event):
             label_message.grid(row=0, column=0)
         case 4:
             create_frame_convolution(frameMain, screenWidth)
+        case 5:
+            create_frame_mophology(frameMain, screenWidth)
 
 
 def create_frame_home():
@@ -79,7 +82,8 @@ comboboxOptions['values'] = ("Selecciona un tema",
                              "Procesamiento en YIQ (Luminancia y Cromaticidad) ",
                              "Operaciones de luminancia",
                              "Aritmetica de pixeles",
-                             "Procesamiento por convolución")
+                             "Procesamiento por convolución",
+                             "Procesamiento morfológico")
 comboboxOptions.current(0)
 comboboxOptions.grid(row=1, column=1, pady=10)
 comboboxOptions.config(width=50)

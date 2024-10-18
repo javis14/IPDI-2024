@@ -1,5 +1,6 @@
 """ FUNCIONES PARA EL PROCESAMIENTO DE IMAGENES """
 import numpy
+import cv2
 
 
 def yiq_a_rgb(imagen_yiq):
@@ -149,3 +150,21 @@ def generar_convolucion(imagen, kernel):
                          j - kernel.shape[0] // 2] = numpy.clip(acumulador, 0, 1)
 
     return imagen_nueva
+
+
+def erotion(imagen, dimension_kernel):
+    """ GENERAR IMAGEN EROSIONADA """
+    kernel = cv2.getStructuringElement(
+        cv2.MORPH_RECT, (dimension_kernel, dimension_kernel))
+    imagen_erosionada = cv2.erode(imagen, kernel, iterations=1)
+
+    return imagen_erosionada
+
+
+def dilatation(imagen, dimension_kernel):
+    """ GENERAR IMAGEN DILATADA """
+    kernel = cv2.getStructuringElement(
+        cv2.MORPH_RECT, (dimension_kernel, dimension_kernel))
+    imagen_dilatada = cv2.dilate(imagen, kernel, iterations=1)
+
+    return imagen_dilatada

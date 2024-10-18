@@ -1,4 +1,4 @@
-""" INTERFAZ DE CONVOLUCION """
+""" INTERFAZ DE PROCESAMIENTO MORFOLÓGICO """
 import tkinter as tk
 from tkinter import ttk, filedialog
 import os.path
@@ -27,27 +27,26 @@ def upload_image():
     label_image_in.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
 
-def convolution(type_filter, dimension_kernel=3, number_neighbors=4, direction=0):
+def morphologic_process(type_filter, dimension_kernel=3):
     """ APLICACION DE CONVOLUCIÓN """
     global image_out
     image_out_name = "image_out"
     match type_filter:
         case 1:
-            kernel = functions.generar_kernel_plano(dimension_kernel)
+            processed_image = functions.erotion(image_in, dimension_kernel)
         case 2:
-            kernel = functions.generar_kernel_bartlett(dimension_kernel)
+            processed_image = functions.dilatation(image_in, dimension_kernel)
         case 3:
-            kernel = functions.generar_kernel_gaussiano(dimension_kernel)
+            print("error...")
         case 4:
-            kernel = functions.generar_kernel_laplaciano(number_neighbors)
+            print("error...")
         case 5:
-            kernel = functions.generar_kernel_sobel(direction)
+            print("error...")
         case 6:
-            kernel = functions.generar_kernel_dog()
+            print("error...")
         case _:
             print("error...")
 
-    processed_image = functions.generar_convolucion(image_in, kernel)
     pyplot.imsave(image_out_name+extension, processed_image)
     image_out = ImageTk.PhotoImage(Image.open(
         image_out_name+extension).convert("L"))
@@ -58,15 +57,13 @@ def convolution(type_filter, dimension_kernel=3, number_neighbors=4, direction=0
 
 def create_frame_parameters(event):
     """ SELECCION DE PARAMETROS """
-    global dimension_selected, neighbors, combobox_sobel_options
+    global combobox_sobel_options
     for wid in frame_parameters.winfo_children():
         wid.destroy()
     if combobox_process.current() > 0:
         button_process['state'] = 'normal'
     match combobox_process.current():
-        case 0:
-            print("caso0")
-        case 1 | 2 | 3:
+        case 1 | 2:
             dimension_selected = tk.IntVar()
             kernel_3x3 = tk.Radiobutton(frame_parameters,
                                         text="Kernel de 3x3",
@@ -87,49 +84,12 @@ def create_frame_parameters(event):
                                         value=7)
             kernel_7x7.grid(row=2, column=0)
             dimension_selected.set(3)
-            button_process.config(command=lambda: convolution(combobox_process.current(),
-                                                              dimension_selected.get()))
+            button_process.config(command=lambda: morphologic_process(combobox_process.current(),
+                                                                      dimension_selected.get()))
+        case 3:
+            print("caso 3")
         case 4:
-            neighbors = tk.IntVar()
-            laplaciano_v4 = tk.Radiobutton(frame_parameters,
-                                           text="4 vecinos",
-                                           font="10",
-                                           variable=neighbors,
-                                           value=4)
-            laplaciano_v4.grid(row=0, column=0)
-            laplaciano_v8 = tk.Radiobutton(frame_parameters,
-                                           text="8 vecinos",
-                                           font="10",
-                                           variable=neighbors,
-                                           value=8)
-            laplaciano_v8.grid(row=1, column=0)
-            neighbors.set(4)
-            button_process.config(command=lambda: convolution(combobox_process.current(),
-                                                              None,
-                                                              neighbors.get()))
-        case 5:
-            label_sobel_options = tk.Label(frame_parameters,
-                                           text="Dirección: ")
-            label_sobel_options.grid(row=0, column=0, pady=5)
-            combobox_sobel_options = ttk.Combobox(frame_parameters,
-                                                  state="readonly")
-            combobox_sobel_options['values'] = ("Norte",
-                                                "Noreste",
-                                                "Este",
-                                                "Sureste",
-                                                "Sur",
-                                                "Suroeste",
-                                                "Oeste",
-                                                "Noroeste")
-            combobox_sobel_options.current(0)
-            combobox_sobel_options.grid(row=0, column=1, pady=5)
-            button_process.config(command=lambda: convolution(combobox_process.current(),
-                                                              None,
-                                                              None,
-                                                              combobox_sobel_options.current()))
-        case 6:
-            button_process.config(command=lambda:
-                                  convolution(combobox_process.current()))
+            print("caso 4")
 
 
 def create_frame_variables(frame_convolution, width_frame_convolution):
@@ -150,8 +110,7 @@ def create_frame_variables(frame_convolution, width_frame_convolution):
                               bg="#F9F9F9")
     label_image_in.grid(row=1, column=0, pady=3, padx=3, sticky="E")
     button_image_in = tk.Button(frame_variables, text="Cargar")
-    button_image_in.config(
-        width=10, command=upload_image)
+    button_image_in.config(width=10, command=upload_image)
     button_image_in.grid(row=1, column=1, pady=3, padx=3, sticky="W")
 
     label_title_process = tk.Label(frame_variables,
@@ -160,12 +119,9 @@ def create_frame_variables(frame_convolution, width_frame_convolution):
     label_title_process.grid(row=2, column=0, columnspan=2, pady=3, padx=5)
     combobox_process = ttk.Combobox(frame_variables, state="readonly")
     combobox_process['values'] = ("Selecciona un filtro",
-                                  "Pasabajos Plano",
-                                  "Pasabajos Bartlett",
-                                  "Pasabajos Gaussiano",
-                                  "Pasaaltos Laplaciano",
-                                  "Pasaaltos Sobel",
-                                  "Pasabanda DOG")
+                                  "Erosión",
+                                  "Dilatación",
+                                  "Apertura")
     combobox_process.current(0)
     combobox_process.grid(row=3, column=0, columnspan=2, pady=5)
     combobox_process['state'] = 'disabled'
@@ -184,21 +140,21 @@ def create_frame_variables(frame_convolution, width_frame_convolution):
     button_process.grid(row=10, column=0, columnspan=2, pady=10)
 
 
-def create_frame_convolution(frame_main, screen_width):
-    """ CREACION DE LA INTERFAZ DE CONVOLUCIÓN """
+def create_frame_mophology(frame_main, screen_width):
+    """ CREACION DE LA INTERFAZ DE PROCESAMIENTO MORFOLÓGICO """
     global frame_image_in, frame_image_out
 
-    frame_convolution = tk.Frame(frame_main, width=screen_width * 0.96)
-    frame_convolution.pack()
-    frame_convolution.config(pady=5, padx=5, bg="white")
+    frame_mophology = tk.Frame(frame_main, width=screen_width * 0.96)
+    frame_mophology.pack()
+    frame_mophology.config(pady=5, padx=5, bg="white")
 
-    width_frame_convolution = frame_convolution.winfo_reqwidth()
+    width_frame_mophology = frame_mophology.winfo_reqwidth()
 
-    create_frame_variables(frame_convolution, width_frame_convolution)
+    create_frame_variables(frame_mophology, width_frame_mophology)
 
-    frame_image_in = tk.Frame(frame_convolution,
-                              width=width_frame_convolution*0.4,
-                              height=frame_convolution.winfo_vrootheight()*0.7)
+    frame_image_in = tk.Frame(frame_mophology,
+                              width=width_frame_mophology*0.4,
+                              height=frame_mophology.winfo_vrootheight()*0.7)
     frame_image_in.grid(row=0, column=1, padx=5)
     frame_image_in.grid_propagate(False)
     label_title_in = tk.Label(frame_image_in,
@@ -206,9 +162,9 @@ def create_frame_convolution(frame_main, screen_width):
                               font="Roboto 12", padx=5)
     label_title_in.grid(row=0, column=0)
 
-    frame_image_out = tk.Frame(frame_convolution,
-                               width=width_frame_convolution*0.4,
-                               height=frame_convolution.winfo_vrootheight()*0.7)
+    frame_image_out = tk.Frame(frame_mophology,
+                               width=width_frame_mophology*0.4,
+                               height=frame_mophology.winfo_vrootheight()*0.7)
     frame_image_out.grid(row=0, column=2, padx=5)
     frame_image_out.grid_propagate(False)
     label_title_out = tk.Label(frame_image_out, text="Imagen procesada",
