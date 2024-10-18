@@ -32,15 +32,110 @@ def rgb_a_yiq(imagen_rgb):
 
 def generar_kernel_plano(dimension):
     """ GENERAR KERNEL PLANO """
-    kernel = numpy.ones([dimension, dimension])
-    suma = dimension*dimension
-    kernel = kernel / suma
+    matriz_base = numpy.ones([dimension, dimension])
+    kernel = matriz_base / matriz_base.sum()
+
+    return kernel
+
+
+def generar_kernel_bartlett(dimension):
+    """ GENERAR KERNEL DE BARTLETT """
+    base = (dimension+1)//2 - numpy.abs(numpy.arange(dimension)-dimension//2)
+    matriz_base = numpy.outer(base, base.T)
+    kernel = matriz_base / matriz_base.sum()
+
+    return kernel
+
+
+def generar_kernel_gaussiano(dimension):
+    """ GENERAR KERNEL GAUSSIANO """
+    def pascal_triangle(steps, last_layer=numpy.array([1])):
+        if steps == 1:
+            return last_layer
+        next_layer = numpy.array([1, *(last_layer[:-1]+last_layer[1:]), 1])
+        return pascal_triangle(steps-1, next_layer)
+
+    base = pascal_triangle(dimension)
+    matriz_base = numpy.outer(base, base.T)
+    kernel = matriz_base / matriz_base.sum()
+
+    return kernel
+
+
+def generar_kernel_laplaciano(vecinos):
+    """ GENERAR KERNEL LAPLACIANO """
+    match vecinos:
+        case 4:
+            kernel = numpy.matrix([[0, -1, 0],
+                                   [-1, 4, -1],
+                                   [0, -1, 0]])
+        case 8:
+            kernel = numpy.matrix([[-1, -1, -1],
+                                   [-1, 8, -1],
+                                   [-1, -1, -1]])
+        case _:
+            print("error...")
+
+    return kernel
+
+
+def generar_kernel_sobel(direccion):
+    """ GENERAR KERNEL SOBEL """
+    match direccion:
+        case 0:
+            kernel = numpy.matrix([[-1, -2, -1],
+                                   [0, 0, 0],
+                                   [1, 2, 1]])
+        case 1:
+            kernel = numpy.matrix([[0, -1, -2],
+                                   [1, 0, -1],
+                                   [2, 1, 0]])
+        case 2:
+            kernel = numpy.matrix([[1, 0, -1],
+                                   [2, 0, -2],
+                                   [1, 0, -1]])
+        case 3:
+            kernel = numpy.matrix([[2, 1, 0],
+                                   [1, 0, -1],
+                                   [0, -1, -2]])
+        case 4:
+            kernel = numpy.matrix([[1, 2, 1],
+                                   [0, 0, 0],
+                                   [-1, -2, -1]])
+        case 5:
+            kernel = numpy.matrix([[0, 1, 2],
+                                   [-1, 0, 1],
+                                   [-2, -1, 0]])
+        case 6:
+            kernel = numpy.matrix([[-1, 0, 1],
+                                   [-2, 0, 2],
+                                   [-1, 0, 1]])
+        case 7:
+            kernel = numpy.matrix([[-2, -1, 0],
+                                   [-1, 0, 1],
+                                   [0, 1, 2]])
+        case _:
+            print("error...")
+
+    return kernel
+
+
+def generar_kernel_dog(dimension_a=5, dimension_b=3):
+    """ GENERAR KERNEL DOG """
+    kernel_a = generar_kernel_gaussiano(dimension_a)
+    kernel_b = generar_kernel_gaussiano(dimension_b)
+    kernel_c = numpy.zeros([dimension_a, dimension_a])
+    for i in range((dimension_a-dimension_b)//2, dimension_b+1):
+        for j in range((dimension_a-dimension_b)//2, dimension_b+1):
+            kernel_c[i, j] = kernel_b[i - ((dimension_a-dimension_b)//2),
+                                      j-((dimension_a-dimension_b)//2)]
+    kernel = numpy.clip(kernel_c - kernel_a, 0, 1)
 
     return kernel
 
 
 def generar_convolucion(imagen, kernel):
-    """ FUNCION DE CONVOLUCION PASA BAJOS """
+    """ FUNCION DE CONVOLUCION """
     imagen_nueva = numpy.zeros(
         [imagen.shape[0] - kernel.shape[0] + 1, imagen.shape[0] - kernel.shape[1] + 1])
     for i in range(kernel.shape[0] // 2, imagen.shape[0] - kernel.shape[0] // 2):
@@ -51,6 +146,6 @@ def generar_convolucion(imagen, kernel):
                     acumulador += imagen[i - kernel.shape[0] // 2 +
                                          k, j - kernel.shape[0] // 2 + l] * kernel[k, l]
             imagen_nueva[i - kernel.shape[0] // 2,
-                         j - kernel.shape[0] // 2] = acumulador
+                         j - kernel.shape[0] // 2] = numpy.clip(acumulador, 0, 1)
 
     return imagen_nueva

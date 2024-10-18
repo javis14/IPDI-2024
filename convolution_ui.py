@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 import os.path
 import imageio
-# from cv2 import *
 from matplotlib import pyplot
 from PIL import Image, ImageTk
 import functions
@@ -21,32 +20,32 @@ def upload_image():
     image_gray = Image.open(file_name).convert("L")
     image = ImageTk.PhotoImage(image_gray)
     image_gray.save(image_in_name+extension)
-    image_in = imageio.imread(image_in_name+extension)
-    combobox_process['state'] = 'normal'
+    image_in = imageio.imread(image_in_name+extension)/255
+    combobox_process['state'] = 'readonly'
     label_image_in = tk.Label(frame_image_in, image=image)
     label_image_in.grid(row=1, column=0)
     label_image_in.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
 
-def convolution(type_filter, dimension_kernel):
+def convolution(type_filter, dimension_kernel=3, number_neighbors=4, direction=0):
     """ APLICACION DE CONVOLUCIÓN """
     global image_out
     image_out_name = "image_out"
     match type_filter:
-        case 0:
-            print("caso0")
         case 1:
             kernel = functions.generar_kernel_plano(dimension_kernel)
         case 2:
-            print("caso4")
+            kernel = functions.generar_kernel_bartlett(dimension_kernel)
         case 3:
-            print("caso4")
+            kernel = functions.generar_kernel_gaussiano(dimension_kernel)
         case 4:
-            print("caso4")
+            kernel = functions.generar_kernel_laplaciano(number_neighbors)
         case 5:
-            print("caso5")
+            kernel = functions.generar_kernel_sobel(direction)
         case 6:
-            print("caso6")
+            kernel = functions.generar_kernel_dog()
+        case _:
+            print("error...")
 
     processed_image = functions.generar_convolucion(image_in, kernel)
     pyplot.imsave(image_out_name+extension, processed_image)
@@ -59,7 +58,7 @@ def convolution(type_filter, dimension_kernel):
 
 def create_frame_parameters(event):
     """ SELECCION DE PARAMETROS """
-    global dimension_selected
+    global dimension_selected, neighbors, combobox_sobel_options
     for wid in frame_parameters.winfo_children():
         wid.destroy()
     if combobox_process.current() > 0:
@@ -71,29 +70,66 @@ def create_frame_parameters(event):
             dimension_selected = tk.IntVar()
             kernel_3x3 = tk.Radiobutton(frame_parameters,
                                         text="Kernel de 3x3",
-                                        font="11",
+                                        font="10",
                                         variable=dimension_selected,
                                         value=3)
             kernel_3x3.grid(row=0, column=0)
             kernel_5x5 = tk.Radiobutton(frame_parameters,
                                         text="Kernel de 5x5",
-                                        font="11",
+                                        font="10",
                                         variable=dimension_selected,
                                         value=5)
             kernel_5x5.grid(row=1, column=0)
             kernel_7x7 = tk.Radiobutton(frame_parameters,
                                         text="Kernel de 7x7",
-                                        font="11",
+                                        font="10",
                                         variable=dimension_selected,
                                         value=7)
             kernel_7x7.grid(row=2, column=0)
             dimension_selected.set(3)
+            button_process.config(command=lambda: convolution(combobox_process.current(),
+                                                              dimension_selected.get()))
         case 4:
-            print("caso4")
+            neighbors = tk.IntVar()
+            laplaciano_v4 = tk.Radiobutton(frame_parameters,
+                                           text="4 vecinos",
+                                           font="10",
+                                           variable=neighbors,
+                                           value=4)
+            laplaciano_v4.grid(row=0, column=0)
+            laplaciano_v8 = tk.Radiobutton(frame_parameters,
+                                           text="8 vecinos",
+                                           font="10",
+                                           variable=neighbors,
+                                           value=8)
+            laplaciano_v8.grid(row=1, column=0)
+            neighbors.set(4)
+            button_process.config(command=lambda: convolution(combobox_process.current(),
+                                                              None,
+                                                              neighbors.get()))
         case 5:
-            print("caso5")
+            label_sobel_options = tk.Label(frame_parameters,
+                                           text="Dirección: ")
+            label_sobel_options.grid(row=0, column=0, pady=5)
+            combobox_sobel_options = ttk.Combobox(frame_parameters,
+                                                  state="readonly")
+            combobox_sobel_options['values'] = ("Norte",
+                                                "Noreste",
+                                                "Este",
+                                                "Sureste",
+                                                "Sur",
+                                                "Suroeste",
+                                                "Oeste",
+                                                "Noroeste")
+            combobox_sobel_options.current(0)
+            combobox_sobel_options.grid(row=0, column=1, pady=5)
+            button_process.config(command=lambda: convolution(combobox_process.current(),
+                                                              None,
+                                                              None,
+                                                              combobox_sobel_options.current()))
         case 6:
-            print("caso6")
+            button_process.config(command=lambda:
+                                  convolution(combobox_process.current()))
 
 
 def create_frame_variables(frame_convolution, width_frame_convolution):
@@ -141,12 +177,11 @@ def create_frame_variables(frame_convolution, width_frame_convolution):
     frame_parameters = tk.Frame(frame_variables)
     frame_parameters.grid(row=5, column=0, columnspan=2, pady=3, padx=5)
 
-    button_process = tk.Button(frame_variables, text="PROCESAR",
-                               command=lambda: convolution(combobox_process.current(), dimension_selected.get()))
+    button_process = tk.Button(frame_variables, text="PROCESAR")
     button_process.config(width=15, font="Roboto 11 bold",
                           bg="#12A14B", fg="white")
     button_process['state'] = 'disabled'
-    button_process.grid(row=10, column=0, columnspan=2)
+    button_process.grid(row=10, column=0, columnspan=2, pady=10)
 
 
 def create_frame_convolution(frame_main, screen_width):
