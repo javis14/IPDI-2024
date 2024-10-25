@@ -1,6 +1,6 @@
 """ FUNCIONES PARA EL PROCESAMIENTO DE IMAGENES """
 import numpy
-import cv2
+from scipy import ndimage
 
 
 def yiq_a_rgb(imagen_yiq):
@@ -29,7 +29,7 @@ def rgb_a_yiq(imagen_rgb):
     return imagen_yiq
 
 
-# GENERACION DE KERNELs - FILTROS PASA BAJOS
+# CONVOLUCION -------------------------------------------------------------------------------------
 
 def generar_kernel_plano(dimension):
     """ GENERAR KERNEL PLANO """
@@ -152,19 +152,169 @@ def generar_convolucion(imagen, kernel):
     return imagen_nueva
 
 
-def erotion(imagen, dimension_kernel):
-    """ GENERAR IMAGEN EROSIONADA """
-    kernel = cv2.getStructuringElement(
-        cv2.MORPH_RECT, (dimension_kernel, dimension_kernel))
-    imagen_erosionada = cv2.erode(imagen, kernel, iterations=1)
+# MORFOLOGIA --------------------------------------------------------------------------------------
+
+def dilatar(imagen, kernel, tipo_kernel, color_objetivo=1):
+    """ DILATACION DE LA IMAGEN """
+    imagen_dilatada = numpy.zeros(imagen.shape)
+    if color_objetivo == 0:
+        imagen = abs(imagen-1)
+    match tipo_kernel:
+        case 0:
+            imagen_dilatada = ndimage.grey_dilation(imagen, size=kernel.shape)
+        case 1:
+            imagen_dilatada = ndimage.grey_dilation(imagen, footprint=kernel)
+        case _:
+            print("error...")
+    if color_objetivo == 0:
+        imagen_dilatada = abs(imagen_dilatada-1)
+
+    return imagen_dilatada
+
+
+def erosionar(imagen, kernel, tipo_kernel, color_objetivo=1):
+    """ EROSION DE LA IMAGEN """
+    imagen_erosionada = numpy.zeros(imagen.shape)
+    if color_objetivo == 0:
+        imagen = abs(imagen-1)
+    match tipo_kernel:
+        case 0:
+            imagen_erosionada = ndimage.grey_erosion(imagen, size=kernel.shape)
+        case 1:
+            imagen_erosionada = ndimage.grey_erosion(imagen, footprint=kernel)
+        case _:
+            print("error...")
+    if color_objetivo == 0:
+        imagen_erosionada = abs(imagen_erosionada-1)
 
     return imagen_erosionada
 
 
-def dilatation(imagen, dimension_kernel):
-    """ GENERAR IMAGEN DILATADA """
-    kernel = cv2.getStructuringElement(
-        cv2.MORPH_RECT, (dimension_kernel, dimension_kernel))
-    imagen_dilatada = cv2.dilate(imagen, kernel, iterations=1)
+def apertura(imagen, kernel, tipo_kernel, color_objetivo=1):
+    """ APERTURA DE IMAGEN """
+    imagen_abierta = numpy.zeros(imagen.shape)
+    if color_objetivo == 0:
+        imagen = abs(imagen-1)
+    match tipo_kernel:
+        case 0:
+            imagen_abierta = ndimage.grey_opening(imagen, size=kernel.shape)
+        case 1:
+            imagen_abierta = ndimage.grey_opening(imagen, footprint=kernel)
+        case _:
+            print("error...")
+    if color_objetivo == 0:
+        imagen_abierta = abs(imagen_abierta-1)
 
-    return imagen_dilatada
+    return imagen_abierta
+
+
+def cierre(imagen, kernel, tipo_kernel, color_objetivo=1):
+    """ CIERRE DE IMAGEN """
+    imagen_cerrada = numpy.zeros(imagen.shape)
+    if color_objetivo == 0:
+        imagen = abs(imagen-1)
+    match tipo_kernel:
+        case 0:
+            imagen_cerrada = ndimage.grey_closing(imagen, size=kernel.shape)
+        case 1:
+            imagen_cerrada = ndimage.grey_closing(imagen, footprint=kernel)
+        case _:
+            print("error...")
+    if color_objetivo == 0:
+        imagen_cerrada = abs(imagen_cerrada-1)
+
+    return imagen_cerrada
+
+
+def borde_exterior(imagen, kernel, tipo_kernel, color_objetivo):
+    """ OBTENCION DEL BORDE EXTERIOR DE LA IMAGEN """
+    imagen_b_e = numpy.zeros(imagen.shape)
+    if color_objetivo == 0:
+        imagen = abs(imagen-1)
+    match tipo_kernel:
+        case 0:
+            imagen_b_e = ndimage.grey_dilation(imagen,
+                                               size=kernel.shape)-imagen
+        case 1:
+            imagen_b_e = ndimage.grey_dilation(imagen,
+                                               footprint=kernel)-imagen
+        case _:
+            print("error...")
+    if color_objetivo == 0:
+        imagen_b_e = abs(imagen_b_e-1)
+
+    return imagen_b_e
+
+
+def borde_interior(imagen, kernel, tipo_kernel, color_objetivo):
+    """ OBTENCION DEL BORDE INTERIOR DE LA IMAGEN """
+    imagen_b_i = numpy.zeros(imagen.shape)
+    if color_objetivo == 0:
+        imagen = abs(imagen-1)
+    match tipo_kernel:
+        case 0:
+            imagen_b_i = imagen - ndimage.grey_erosion(imagen,
+                                                       size=kernel.shape)
+        case 1:
+            imagen_b_i = imagen - ndimage.grey_erosion(imagen,
+                                                       footprint=kernel)
+        case _:
+            print("error...")
+    if color_objetivo == 0:
+        imagen_b_i = abs(imagen_b_i-1)
+
+    return imagen_b_i
+
+
+def gradiente(imagen, kernel, tipo_kernel, color_objetivo):
+    """ OBTENCION GRADIENTE DE LA IMAGEN """
+    imagen_gradiente = numpy.zeros(imagen.shape)
+    if color_objetivo == 0:
+        imagen = abs(imagen-1)
+    match tipo_kernel:
+        case 0:
+            imagen_dilatada = ndimage.grey_dilation(imagen, size=kernel.shape)
+            imagen_erosionada = ndimage.grey_erosion(imagen, size=kernel.shape)
+            imagen_gradiente = imagen_dilatada - imagen_erosionada
+        case 1:
+            imagen_dilatada = ndimage.grey_dilation(imagen, footprint=kernel)
+            imagen_erosionada = ndimage.grey_erosion(imagen, footprint=kernel)
+            imagen_gradiente = imagen_dilatada - imagen_erosionada
+        case _:
+            print("error...")
+    if color_objetivo == 0:
+        imagen_gradiente = abs(imagen_gradiente-1)
+
+    return imagen_gradiente
+
+
+def mediana(imagen, kernel, color_objetivo):
+    """ CALCULO DE MEDIANA DE LA IMAGEN """
+    imagen_mediana = numpy.zeros(
+        (numpy.array(imagen.shape)-numpy.array(kernel.shape)+1))
+    if color_objetivo == 0:
+        imagen = abs(imagen-1)
+    for x in range(imagen_mediana.shape[0]):
+        for y in range(imagen_mediana.shape[1]):
+            imagen_mediana[x, y] = numpy.median(
+                imagen[x:x+kernel.shape[0], y:y+kernel.shape[1]]*kernel)
+    if color_objetivo == 0:
+        imagen_mediana = abs(imagen_mediana-1)
+
+    return imagen_mediana
+
+
+def generar_kernel(radio, tipo, umbral=0.3):
+    """ GENERACION DE KERNEL PARA MORFOLOGIA """
+    match tipo:
+        case 0:
+            kernel_cuadrado = numpy.ones(
+                (radio*2+1, radio*2+1), dtype=numpy.bool_)
+            return kernel_cuadrado
+        case 1:
+            vector = numpy.linspace(-radio, radio, radio*2+1)
+            [x, y] = numpy.meshgrid(vector, vector)
+            kernel_circular = (x**2 + y**2)**0.5 < (radio + umbral)
+            return kernel_circular
+        case _:
+            print("error...")

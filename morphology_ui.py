@@ -27,23 +27,58 @@ def upload_image():
     label_image_in.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
 
-def morphologic_process(type_filter, dimension_kernel=3):
-    """ APLICACION DE CONVOLUCIÓN """
+def morphologic_process(type_filter, color_image=1, radio_kernel=3, type_kernel=0):
+    """ APLICACION DE CONVOLUCIÓN MORFOLOGICA """
     global image_out
     image_out_name = "image_out"
     match type_filter:
         case 1:
-            processed_image = functions.erotion(image_in, dimension_kernel)
+            processed_image = functions.erosionar(image_in,
+                                                  functions.generar_kernel(
+                                                      radio_kernel, type_kernel),
+                                                  type_kernel,
+                                                  color_image)
         case 2:
-            processed_image = functions.dilatation(image_in, dimension_kernel)
+            processed_image = functions.dilatar(image_in,
+                                                functions.generar_kernel(
+                                                    radio_kernel, type_kernel),
+                                                type_kernel,
+                                                color_image)
         case 3:
-            print("error...")
+            processed_image = functions.apertura(image_in,
+                                                 functions.generar_kernel(
+                                                     radio_kernel, type_kernel),
+                                                 type_kernel,
+                                                 color_image)
         case 4:
-            print("error...")
+            processed_image = functions.cierre(image_in,
+                                               functions.generar_kernel(
+                                                   radio_kernel, type_kernel),
+                                               type_kernel,
+                                               color_image)
         case 5:
-            print("error...")
+            processed_image = functions.borde_exterior(image_in,
+                                                       functions.generar_kernel(
+                                                           radio_kernel, type_kernel),
+                                                       type_kernel,
+                                                       color_image)
         case 6:
-            print("error...")
+            processed_image = functions.borde_interior(image_in,
+                                                       functions.generar_kernel(
+                                                           radio_kernel, type_kernel),
+                                                       type_kernel,
+                                                       color_image)
+        case 7:
+            processed_image = functions.gradiente(image_in,
+                                                  functions.generar_kernel(
+                                                      radio_kernel, type_kernel),
+                                                  type_kernel,
+                                                  color_image)
+        case 8:
+            processed_image = functions.mediana(image_in,
+                                                functions.generar_kernel(
+                                                    radio_kernel, type_kernel),
+                                                color_image)
         case _:
             print("error...")
 
@@ -57,39 +92,79 @@ def morphologic_process(type_filter, dimension_kernel=3):
 
 def create_frame_parameters(event):
     """ SELECCION DE PARAMETROS """
-    global combobox_sobel_options
     for wid in frame_parameters.winfo_children():
         wid.destroy()
     if combobox_process.current() > 0:
         button_process['state'] = 'normal'
-    match combobox_process.current():
-        case 1 | 2:
-            dimension_selected = tk.IntVar()
-            kernel_3x3 = tk.Radiobutton(frame_parameters,
-                                        text="Kernel de 3x3",
-                                        font="10",
-                                        variable=dimension_selected,
-                                        value=3)
-            kernel_3x3.grid(row=0, column=0)
-            kernel_5x5 = tk.Radiobutton(frame_parameters,
-                                        text="Kernel de 5x5",
-                                        font="10",
-                                        variable=dimension_selected,
-                                        value=5)
-            kernel_5x5.grid(row=1, column=0)
-            kernel_7x7 = tk.Radiobutton(frame_parameters,
-                                        text="Kernel de 7x7",
-                                        font="10",
-                                        variable=dimension_selected,
-                                        value=7)
-            kernel_7x7.grid(row=2, column=0)
-            dimension_selected.set(3)
-            button_process.config(command=lambda: morphologic_process(combobox_process.current(),
-                                                                      dimension_selected.get()))
-        case 3:
-            print("caso 3")
-        case 4:
-            print("caso 4")
+    label_color_image = tk.Label(frame_parameters,
+                                 text="Color de imagen y fondo:",
+                                 font="10",
+                                 bg="#F9F9F9")
+    label_color_image.grid(row=0, column=0, sticky="W")
+    color_selected = tk.IntVar()
+    image_white = tk.Radiobutton(frame_parameters,
+                                 text="Imagen blanca, fondo negro",
+                                 font="8",
+                                 bg="#F9F9F9",
+                                 padx=10,
+                                 variable=color_selected,
+                                 value=1)
+    image_white.grid(row=1, column=0, sticky="W")
+    image_black = tk.Radiobutton(frame_parameters,
+                                 text="Imagen negra, fondo blanco",
+                                 font="8",
+                                 bg="#F9F9F9",
+                                 padx=10,
+                                 variable=color_selected,
+                                 value=0)
+    image_black.grid(row=2, column=0, sticky="W")
+    color_selected.set(1)
+    label_type_kernel = tk.Label(frame_parameters,
+                                 text="Tipo de kernel:",
+                                 font=10,
+                                 bg="#F9F9F9")
+    label_type_kernel.grid(row=3, column=0, sticky="W")
+    type_selected = tk.IntVar()
+    kernel_quadrate = tk.Radiobutton(frame_parameters,
+                                     text="Kernel cuadrado",
+                                     font="8",
+                                     bg="#F9F9F9",
+                                     padx=10,
+                                     variable=type_selected,
+                                     value=0)
+    kernel_quadrate.grid(row=4, column=0, sticky="W")
+    kernel_circle = tk.Radiobutton(frame_parameters,
+                                   text="Kernel circular",
+                                   font="8",
+                                   bg="#F9F9F9",
+                                   padx=10,
+                                   variable=type_selected,
+                                   value=1)
+    kernel_circle.grid(row=5, column=0, sticky="W")
+    type_selected.set(0)
+    label_radio_kernel = tk.Label(frame_parameters,
+                                  text="Radio del kernel:",
+                                  font=10,
+                                  bg="#F9F9F9")
+    label_radio_kernel.grid(row=6, column=0, sticky="W")
+    combobox_radio_options = ttk.Combobox(frame_parameters,
+                                          state="readonly")
+    combobox_radio_options['values'] = ("1",
+                                        "2",
+                                        "3",
+                                        "4",
+                                        "5",
+                                        "6",
+                                        "7",
+                                        "8",
+                                        "9",
+                                        "10")
+    combobox_radio_options.current(0)
+    combobox_radio_options.grid(row=7, column=0)
+    button_process.config(command=lambda: morphologic_process(combobox_process.current(),
+                                                              color_selected.get(),
+                                                              combobox_radio_options.current()+1,
+                                                              type_selected.get()))
 
 
 def create_frame_variables(frame_convolution, width_frame_convolution):
@@ -121,7 +196,12 @@ def create_frame_variables(frame_convolution, width_frame_convolution):
     combobox_process['values'] = ("Selecciona un filtro",
                                   "Erosión",
                                   "Dilatación",
-                                  "Apertura")
+                                  "Apertura",
+                                  "Cierre",
+                                  "Borde exterior",
+                                  "Borde interior",
+                                  "Gradiente",
+                                  "Mediana")
     combobox_process.current(0)
     combobox_process.grid(row=3, column=0, columnspan=2, pady=5)
     combobox_process['state'] = 'disabled'
@@ -130,14 +210,14 @@ def create_frame_variables(frame_convolution, width_frame_convolution):
                                       text="Configuración de parametros",
                                       font="Roboto 12", bg="#F9F9F9")
     label_title_parameters.grid(row=4, column=0, columnspan=2, pady=3, padx=5)
-    frame_parameters = tk.Frame(frame_variables)
+    frame_parameters = tk.Frame(frame_variables, bg="#F9F9F9")
     frame_parameters.grid(row=5, column=0, columnspan=2, pady=3, padx=5)
 
     button_process = tk.Button(frame_variables, text="PROCESAR")
     button_process.config(width=15, font="Roboto 11 bold",
                           bg="#12A14B", fg="white")
     button_process['state'] = 'disabled'
-    button_process.grid(row=10, column=0, columnspan=2, pady=10)
+    button_process.grid(row=15, column=0, columnspan=2, pady=10)
 
 
 def create_frame_mophology(frame_main, screen_width):
