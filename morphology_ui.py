@@ -224,17 +224,17 @@ def create_frame_mophology(frame_main, screen_width):
     """ CREACION DE LA INTERFAZ DE PROCESAMIENTO MORFOLÓGICO """
     global frame_image_in, frame_image_out
 
-    frame_mophology = tk.Frame(frame_main, width=screen_width * 0.96)
-    frame_mophology.pack()
-    frame_mophology.config(pady=5, padx=5, bg="white")
+    frame_morphology = tk.Frame(frame_main, width=screen_width * 0.96)
+    frame_morphology.pack()
+    frame_morphology.config(pady=5, padx=5, bg="white")
 
-    width_frame_mophology = frame_mophology.winfo_reqwidth()
+    width_frame_morphology = frame_morphology.winfo_reqwidth()
 
-    create_frame_variables(frame_mophology, width_frame_mophology)
+    create_frame_variables(frame_morphology, width_frame_morphology)
 
-    frame_image_in = tk.Frame(frame_mophology,
-                              width=width_frame_mophology*0.4,
-                              height=frame_mophology.winfo_vrootheight()*0.7)
+    frame_image_in = tk.Frame(frame_morphology,
+                              width=width_frame_morphology*0.4,
+                              height=frame_morphology.winfo_vrootheight()*0.7)
     frame_image_in.grid(row=0, column=1, padx=5)
     frame_image_in.grid_propagate(False)
     label_title_in = tk.Label(frame_image_in,
@@ -242,9 +242,9 @@ def create_frame_mophology(frame_main, screen_width):
                               font="Roboto 12", padx=5)
     label_title_in.grid(row=0, column=0)
 
-    frame_image_out = tk.Frame(frame_mophology,
-                               width=width_frame_mophology*0.4,
-                               height=frame_mophology.winfo_vrootheight()*0.7)
+    frame_image_out = tk.Frame(frame_morphology,
+                               width=width_frame_morphology*0.4,
+                               height=frame_morphology.winfo_vrootheight()*0.7)
     frame_image_out.grid(row=0, column=2, padx=5)
     frame_image_out.grid_propagate(False)
     label_title_out = tk.Label(frame_image_out, text="Imagen procesada",

@@ -3,23 +3,20 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 
+from process_yiq_ui import create_frame_process_yiq
 from convolution_ui import create_frame_convolution
 from morphology_ui import create_frame_mophology
 
 
 def create_frame(event):
-    """ SELECCION DE TEMA """
+    """ SELECCION DEL TIPO DE PROCESAMIENTO A REALIZAR """
     for wid in frameMain.winfo_children():
         wid.destroy()
     match comboboxOptions.current():
         case 0:
             create_frame_home()
         case 1:
-            frame1 = tk.Frame(frameMain, width=300, height=100, bg="red")
-            frame1.pack()
-            label_message = tk.Label(frame1,
-                                     text="Seccion en mantenimiento...")
-            label_message.grid(row=0, column=0)
+            create_frame_process_yiq(frameMain, screenWidth)
         case 2:
             frame2 = tk.Frame(frameMain, width=300, height=100, bg="blue")
             frame2.pack()
