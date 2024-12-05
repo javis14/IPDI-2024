@@ -15,7 +15,7 @@ def upload_image():
     file_name = filedialog.askopenfilename(
         title='Abrir imagen',
         initialdir='/',
-        filetypes=[("images files", "*.png *.jpg *.gif *.bmp")])
+        filetypes=[("images files", "*.png *.jpg *.jpeg *.gif *.bmp")])
     image_path, extension = os.path.splitext(file_name)
     image_gray = Image.open(file_name).convert("L")
     image = ImageTk.PhotoImage(image_gray)

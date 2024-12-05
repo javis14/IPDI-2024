@@ -15,7 +15,7 @@ def upload_image():
     file_name = filedialog.askopenfilename(
         title='Abrir imagen',
         initialdir='/',
-        filetypes=[("images files", "*.png *.jpg *.gif *.bmp")])
+        filetypes=[("images files", "*.png *.jpg *.jpeg *.gif *.bmp")])
     image_path, extension = os.path.splitext(file_name)
     image_gray = Image.open(file_name).convert("L")
     image = ImageTk.PhotoImage(image_gray)
@@ -150,8 +150,7 @@ def create_frame_variables(frame_convolution, width_frame_convolution):
                               bg="#F9F9F9")
     label_image_in.grid(row=1, column=0, pady=3, padx=3, sticky="E")
     button_image_in = tk.Button(frame_variables, text="Cargar")
-    button_image_in.config(
-        width=10, command=upload_image)
+    button_image_in.config(width=10, command=upload_image)
     button_image_in.grid(row=1, column=1, pady=3, padx=3, sticky="W")
 
     label_title_process = tk.Label(frame_variables,

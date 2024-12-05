@@ -4,6 +4,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 from process_yiq_ui import create_frame_process_yiq
+from pixel_arithmetic import create_frame_pixel_arithmetic
 from convolution_ui import create_frame_convolution
 from morphology_ui import create_frame_mophology
 
@@ -18,11 +19,7 @@ def create_frame(event):
         case 1:
             create_frame_process_yiq(frameMain, screenWidth)
         case 2:
-            frame2 = tk.Frame(frameMain, width=300, height=100, bg="blue")
-            frame2.pack()
-            label_message = tk.Label(frame2,
-                                     text="Seccion en mantenimiento...")
-            label_message.grid(row=0, column=0)
+            create_frame_pixel_arithmetic(frameMain, screenWidth)
         case 3:
             frame3 = tk.Frame(frameMain, width=300, height=100, bg="green")
             frame3.pack()
@@ -77,8 +74,8 @@ labelTitle.config(pady=10)
 comboboxOptions = ttk.Combobox(frameRoot, state="readonly")
 comboboxOptions['values'] = ("Selecciona un tema",
                              "Procesamiento en YIQ (Luminancia y Cromaticidad) ",
-                             "Operaciones de luminancia",
                              "Aritmetica de pixeles",
+                             "Operaciones de luminancia",
                              "Procesamiento por convolución",
                              "Procesamiento morfológico")
 comboboxOptions.current(0)

@@ -28,8 +28,135 @@ def rgb_a_yiq(imagen_rgb):
 
     return imagen_yiq
 
+# ARITMETICA DE PIXELES ---------------------------------------------------------------------------
+
+
+def suma(image_a, image_b, format_selected):
+    """ SUMA DE DOS IMAGENES """
+    image_c = numpy.zeros(image_a.shape)
+    match format_selected:
+        case 1:
+            image_c[:, :, 0] = numpy.clip(image_a[:, :, 0] + image_b[:, :, 0],
+                                          0, 1)
+            image_c[:, :, 1] = numpy.clip(image_a[:, :, 1] + image_b[:, :, 1],
+                                          0, 1)
+            image_c[:, :, 2] = numpy.clip(image_a[:, :, 2] + image_b[:, :, 2],
+                                          0, 1)
+        case 2:
+            image_c[:, :, 0] = numpy.clip((image_a[:, :, 0] + image_b[:, :, 0])/2,
+                                          0, 1)
+            image_c[:, :, 1] = numpy.clip((image_a[:, :, 1] + image_b[:, :, 1])/2,
+                                          0, 1)
+            image_c[:, :, 2] = numpy.clip((image_a[:, :, 2] + image_b[:, :, 2])/2,
+                                          0, 1)
+        case 3:
+            image_a_yiq = rgb_a_yiq(image_a)
+            image_b_yiq = rgb_a_yiq(image_b)
+
+            image_c[:, :, 0] = numpy.clip(image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0],
+                                          0, 1)
+            image_c[:, :, 1] = (image_a_yiq[:, :, 0] * image_a_yiq[:, :, 1] + image_b_yiq[:, :, 0] *
+                                image_b_yiq[:, :, 1]) / numpy.clip((image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0]), 0.003922, 1)
+            image_c[:, :, 2] = (image_a_yiq[:, :, 0] * image_a_yiq[:, :, 2] + image_b_yiq[:, :, 0] *
+                                image_b_yiq[:, :, 2]) / numpy.clip((image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0]), 0.003922, 1)
+
+            image_c = yiq_a_rgb(image_c)
+        case 4:
+            image_a_yiq = rgb_a_yiq(image_a)
+            image_b_yiq = rgb_a_yiq(image_b)
+
+            image_c[:, :, 0] = numpy.clip((image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0])/2,
+                                          0, 1)
+            image_c[:, :, 1] = (image_a_yiq[:, :, 0] * image_a_yiq[:, :, 1] + image_b_yiq[:, :, 0] *
+                                image_b_yiq[:, :, 1]) / numpy.clip((image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0]), 0.003922, 1)
+            image_c[:, :, 2] = (image_a_yiq[:, :, 0] * image_a_yiq[:, :, 2] + image_b_yiq[:, :, 0] *
+                                image_b_yiq[:, :, 2]) / numpy.clip((image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0]), 0.003922, 1)
+
+            image_c = yiq_a_rgb(image_c)
+        case 5:
+            image_a_yiq = rgb_a_yiq(image_a)
+            image_b_yiq = rgb_a_yiq(image_b)
+
+            for i in range(0, image_a_yiq.shape[0]):
+                for j in range(0, image_a_yiq.shape[1]):
+                    if image_a_yiq[i, j, 0] > image_b_yiq[i, j, 0]:
+                        image_c[i, j, 0] = image_a_yiq[i, j, 0]
+                        image_c[i, j, 1] = image_a_yiq[i, j, 1]
+                        image_c[i, j, 2] = image_a_yiq[i, j, 2]
+                    else:
+                        image_c[i, j, 0] = image_b_yiq[i, j, 0]
+                        image_c[i, j, 1] = image_b_yiq[i, j, 1]
+                        image_c[i, j, 2] = image_b_yiq[i, j, 2]
+
+            image_c = yiq_a_rgb(image_c)
+
+    return image_c
+
+
+def resta(image_a, image_b, format_selected):
+    """ RESTA DE DOS IMAGENES """
+    image_c = numpy.zeros(image_a.shape)
+    match format_selected:
+        case 1:
+            image_c[:, :, 0] = numpy.clip(image_a[:, :, 0] - image_b[:, :, 0],
+                                          0, 1)
+            image_c[:, :, 1] = numpy.clip(image_a[:, :, 1] - image_b[:, :, 1],
+                                          0, 1)
+            image_c[:, :, 2] = numpy.clip(image_a[:, :, 2] - image_b[:, :, 2],
+                                          0, 1)
+        case 2:
+            image_c[:, :, 0] = numpy.clip((image_a[:, :, 0] - image_b[:, :, 0])/2,
+                                          0, 1)
+            image_c[:, :, 1] = numpy.clip((image_a[:, :, 1] - image_b[:, :, 1])/2,
+                                          0, 1)
+            image_c[:, :, 2] = numpy.clip((image_a[:, :, 2] - image_b[:, :, 2])/2,
+                                          0, 1)
+        case 3:
+            image_a_yiq = rgb_a_yiq(image_a)
+            image_b_yiq = rgb_a_yiq(image_b)
+
+            image_c[:, :, 0] = numpy.clip(image_a_yiq[:, :, 0] - image_b_yiq[:, :, 0],
+                                          0, 1)
+            image_c[:, :, 1] = (image_a_yiq[:, :, 0] * image_a_yiq[:, :, 1] + image_b_yiq[:, :, 0] *
+                                image_b_yiq[:, :, 1]) / numpy.clip((image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0]), 0.003922, 1)
+            image_c[:, :, 2] = (image_a_yiq[:, :, 0] * image_a_yiq[:, :, 2] + image_b_yiq[:, :, 0] *
+                                image_b_yiq[:, :, 2]) / numpy.clip((image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0]), 0.003922, 1)
+
+            image_c = yiq_a_rgb(image_c)
+        case 4:
+            image_a_yiq = rgb_a_yiq(image_a)
+            image_b_yiq = rgb_a_yiq(image_b)
+
+            image_c[:, :, 0] = numpy.clip((image_a_yiq[:, :, 0] - image_b_yiq[:, :, 0])/2,
+                                          0, 1)
+            image_c[:, :, 1] = (image_a_yiq[:, :, 0] * image_a_yiq[:, :, 1] + image_b_yiq[:, :, 0] *
+                                image_b_yiq[:, :, 1]) / numpy.clip((image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0]), 0.003922, 1)
+            image_c[:, :, 2] = (image_a_yiq[:, :, 0] * image_a_yiq[:, :, 2] + image_b_yiq[:, :, 0] *
+                                image_b_yiq[:, :, 2]) / numpy.clip((image_a_yiq[:, :, 0] + image_b_yiq[:, :, 0]), 0.003922, 1)
+
+            image_c = yiq_a_rgb(image_c)
+        case 5:
+            image_a_yiq = rgb_a_yiq(image_a)
+            image_b_yiq = rgb_a_yiq(image_b)
+
+            for i in range(0, image_a_yiq.shape[0]):
+                for j in range(0, image_a_yiq.shape[1]):
+                    if image_a_yiq[i, j, 0] < image_b_yiq[i, j, 0]:
+                        image_c[i, j, 0] = image_a_yiq[i, j, 0]
+                        image_c[i, j, 1] = image_a_yiq[i, j, 1]
+                        image_c[i, j, 2] = image_a_yiq[i, j, 2]
+                    else:
+                        image_c[i, j, 0] = image_b_yiq[i, j, 0]
+                        image_c[i, j, 1] = image_b_yiq[i, j, 1]
+                        image_c[i, j, 2] = image_b_yiq[i, j, 2]
+
+            image_c = yiq_a_rgb(image_c)
+
+    return image_c
+
 
 # CONVOLUCION -------------------------------------------------------------------------------------
+
 
 def generar_kernel_plano(dimension):
     """ GENERAR KERNEL PLANO """
