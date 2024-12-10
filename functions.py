@@ -1,5 +1,6 @@
 """ FUNCIONES PARA EL PROCESAMIENTO DE IMAGENES """
 import numpy
+import math
 from scipy import ndimage
 
 
@@ -153,6 +154,52 @@ def resta(image_a, image_b, format_selected):
             image_c = yiq_a_rgb(image_c)
 
     return image_c
+
+
+# OPERACION DE LUMINANCIA -------------------------------------------------------------------------
+def aumentar_luminancia(imagen, funcion):
+    """ FUNCIONES PARA AUMENTAR LA LUMINANCIA """
+    imagen_yiq = rgb_a_yiq(imagen)
+    match funcion:
+        case 1:
+            imagen_yiq[:, :, 0] = numpy.sqrt(imagen_yiq[:, :, 0])
+        case _:
+            print("error...")
+
+    nueva_imagen = yiq_a_rgb(imagen_yiq)
+
+    return nueva_imagen
+
+
+def disminuir_luminancia(imagen, funcion):
+    """ FUNCIONES PARA DISMINUIR LA LUMINANCIA """
+    imagen_yiq = rgb_a_yiq(imagen)
+    match funcion:
+        case 1:
+            imagen_yiq[:, :, 0] = numpy.square(imagen_yiq[:, :, 0])
+        case _:
+            print("error...")
+
+    nueva_imagen = yiq_a_rgb(imagen_yiq)
+
+    return nueva_imagen
+
+
+def mejorar_contraste(imagen, ymin, ymax):
+    """ FUNCION LINENAL A TROZOS PARA MEJORAR CONTRASTE """
+    imagen_yiq = rgb_a_yiq(imagen)
+    for i in range(0, imagen_yiq.shape[0]):
+        for j in range(0, imagen_yiq.shape[1]):
+            if imagen_yiq[i, j, 0] < ymin:
+                imagen_yiq[i, j, 0] = 0
+            elif imagen_yiq[i, j, 0] > ymax:
+                imagen_yiq[i, j, 0] = 1
+            else:
+                imagen_yiq[i, j, 0] = 1*imagen_yiq[i, j, 0]/ymax
+
+    nueva_imagen = yiq_a_rgb(imagen_yiq)
+
+    return nueva_imagen
 
 
 # CONVOLUCION -------------------------------------------------------------------------------------

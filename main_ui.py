@@ -4,7 +4,8 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 from process_yiq_ui import create_frame_process_yiq
-from pixel_arithmetic import create_frame_pixel_arithmetic
+from pixel_arithmetic_ui import create_frame_pixel_arithmetic
+from luminance_operations_ui import create_frame_luminance_operations
 from convolution_ui import create_frame_convolution
 from morphology_ui import create_frame_mophology
 
@@ -21,11 +22,7 @@ def create_frame(event):
         case 2:
             create_frame_pixel_arithmetic(frameMain, screenWidth)
         case 3:
-            frame3 = tk.Frame(frameMain, width=300, height=100, bg="green")
-            frame3.pack()
-            label_message = tk.Label(frame3,
-                                     text="Seccion en mantenimiento...")
-            label_message.grid(row=0, column=0)
+            create_frame_luminance_operations(frameMain, screenWidth)
         case 4:
             create_frame_convolution(frameMain, screenWidth)
         case 5:
